@@ -1,8 +1,8 @@
-### GameServer
+### GameServer ISOLA
 
 A Battle field for the Bot for ISOLA
 
-Isola is a two-player abstract strategy board game. It is played on a 7x7 board
+ISOLA is a two-player abstract strategy board game. It is played on a 7x7 board
 which is initially filled with squares, except at the starting positions of the
 pieces. Both players have one piece; it is in the middle position of the row
 closest to his/her side of the board.
