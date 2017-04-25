@@ -24,3 +24,4 @@ class History(models.Model):
 class CodeBot(models.Model):
     player = models.ForeignKey('Player', models.CASCADE, db_column='player')
     code = models.TextField() # source code of the bot, any language
+    lang = models.CharField(max_length=10, choices=[('python', 'python')])
