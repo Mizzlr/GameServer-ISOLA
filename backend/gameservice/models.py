@@ -5,17 +5,19 @@ class Game(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField()
     creation_time = models.DateTimeField()
-    starter = models.TextField() # source code that emits the starting board configuration
-    umpire = models.TextField() # source code of umpire that will check that validity of the game
+    starter = models.FileField() # source code that emits the starting board configuration
+    umpire = models.FileField() # source code of umpire that will check that validity of the game
     language = models.CharField(max_length=10, choices=[('python', 'python')], default='python')
     creation_time = models.DateTimeField()
-    max_moves = models.IntegerField(default=100)
+    max_moves = models.IntegerField(default=1000)
+    move_timeout = models.IntegerField() # milliseconds to wait before timeout, 1000 ms == 1 second
 
 class Player(models.Model):
     name = models.CharField(max_length=30)
     creation_time = models.DateTimeField()
 
 class Contest(models.Model):
+    game = models.ForeignKey('Game', models.CASCADE, db_column='game')
     player1 = models.ForeignKey('Player', models.CASCADE, related_name='contest_player1', db_column='player1')
     player2 = models.ForeignKey('Player', models.CASCADE, related_name='contest_player2', db_column='player2')
     options = models.TextField() # input passed to the Game.starter too generate the starting board
@@ -24,6 +26,7 @@ class Contest(models.Model):
     submission2 = models.ForeignKey('Submission', models.CASCADE, related_name='contest_submission2', db_column='submission2')
     winner = models.CharField(max_length=10, choices=[('Player1', 'Player1'), ('Player2', 'Player2')], null=True)
     creation_time = models.DateTimeField()
+    move_timeout = models.IntegerField(null=True) # milliseconds to wait before timeout
 
 class ContestHistory(models.Model):
     contest = models.ForeignKey('Contest', models.CASCADE, db_column='contest')
@@ -33,6 +36,6 @@ class ContestHistory(models.Model):
 
 class Submission(models.Model):
     player = models.ForeignKey('Player', models.CASCADE, db_column='player')
-    code_snippet = models.TextField() # source code of the bot, any language
+    code_snippet = models.FileField() # source code of the bot, any language
     language = models.CharField(max_length=10, choices=[('python', 'python')], default='python')
     creation_time = models.DateTimeField()

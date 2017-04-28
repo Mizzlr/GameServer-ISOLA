@@ -4,7 +4,10 @@ from rest_framework import viewsets
 from gameservice import models
 from gameservice import serializers
 
-# Create your views here.
+class GameViewSet(viewsets.ModelViewSet):
+    queryset = models.Game.objects.all()
+    serializer_class = serializers.GameSerializer
+
 class ContestViewSet(viewsets.ModelViewSet):
     queryset = models.Contest.objects.all()
     serializer_class = serializers.ContestSerializer

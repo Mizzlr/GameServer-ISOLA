@@ -9,7 +9,6 @@ from utils import bash, Logger
 class Arena(object):
     def __init__(self, contest, game):
         self.contest = contest
-        self.game = game
         self.logger = Logger(self.__class__.__name__)
 
     def _execute(self, script, stdin, language):
@@ -21,6 +20,7 @@ class Arena(object):
             fd, filename = tempfile.mktemp(suffix=".py")
             os.write(fd, script)
             stdout = bash("python " + filename, stdin=stdin)
+            os.close(fd)
             return stdout
 
         # TODO: Add support for more languages
@@ -50,7 +50,11 @@ class Arena(object):
         self.contest.save()
 
     def play(self):
-        board = self._execute(self.game.starter, self.contest.options, self.game.language)
+        move_timeout = self.contest.move_timeout
+        if not move_timeout:
+            move_timeout = self.contest.game.move_timeout
+
+        board = self._execute(self.contest.game.starter, self.contest.options, self.contest.game.language)
 
         # swap players if neccessary
         player1 = self.contest.player1 if self.contest.starter == 'Player1' else self.contest.player2
@@ -60,10 +64,10 @@ class Arena(object):
         submission1 = self.contest.submission1 if self.contest.submission1.player == player1 else self.contest.submission2
         submission2 = self.contest.submission2 if self.contest.submission2.player == player2 else self.contest.submission1
 
-        moves_count = 0
+        moves_played = 0
         while True:
             move1 = self._execute(submission1.code_snippet, board, submission1.language)
-            board, is_valid, is_winner = self._parse_move(self._execute(self.game.umpire, move1, self.game.language))
+            board, is_valid, is_winner = self._parse_move(self._execute(self.contest.game.umpire, move1, self.contest.game.language))
 
             self._save_history(player1, move1)
             if not is_valid:
@@ -74,12 +78,12 @@ class Arena(object):
                 self._set_winner(player1)
                 break
 
-            moves_count += 1
-            if moves_count > self.game.max_moves:
+            moves_played += 1
+            if moves_played > self.contest.game.max_moves:
                 break
 
             move2 = self._execute(submission2.code_snippet, board, submission2.language)
-            board, is_valid, is_winner = self._parse_move(self._execute(self.game.umpire, move2, self.game.language))
+            board, is_valid, is_winner = self._parse_move(self._execute(self.contest.game.umpire, move2, self.contest.game.language))
 
             self._save_history(player2, move2)
             if not is_valid:
@@ -90,6 +94,6 @@ class Arena(object):
                 self._set_winner(player2)
                 break
 
-            moves_count += 1
-            if moves_count > self.game.max_moves:
+            moves_played += 1
+            if moves_played > self.contest.game.max_moves:
                 break

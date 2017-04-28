@@ -1,0 +1,1 @@
+# This script generates initial configuration of the board

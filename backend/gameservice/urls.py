@@ -5,6 +5,7 @@ from gameservice import views
 from rest_framework_nested import routers
 
 router = routers.DefaultRouter()
+router.register(r'games', views.GameViewSet)
 router.register(r'contests', views.ContestViewSet)
 router.register(r'players', views.PlayerViewSet)
 router.register(r'submissions', views.SubmissionViewSet)
