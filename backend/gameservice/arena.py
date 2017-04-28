@@ -4,12 +4,17 @@ import tempfile
 
 from django.utils import timezone
 from gameservice import models
-from utils import bash, Logger
+from utils import bash, Logger, deadline
 
 class Arena(object):
     def __init__(self, contest, game):
         self.contest = contest
         self.logger = Logger(self.__class__.__name__)
+
+        move_timeout = self.contest.move_timeout
+        if not move_timeout:
+            move_timeout = self.contest.game.move_timeout
+        self._execute = deadline(move_timeout)(self._execute)
 
     def _execute(self, script, stdin, language):
         "Generate stdout by executing the script with given stdin."
@@ -50,10 +55,6 @@ class Arena(object):
         self.contest.save()
 
     def play(self):
-        move_timeout = self.contest.move_timeout
-        if not move_timeout:
-            move_timeout = self.contest.game.move_timeout
-
         board = self._execute(self.contest.game.starter, self.contest.options, self.contest.game.language)
 
         # swap players if neccessary

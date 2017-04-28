@@ -1,6 +1,6 @@
 import subprocess
 import logging
-
+import signal
 __author__ = 'Mushtaque Ahamed'
 
 def bash(cmd, split=True, strip=False, filter_empty=True, stdin=''):
@@ -65,3 +65,22 @@ logging.basicConfig(level=logging.INFO)
 
 def Logger(name):
     return logging.getLogger(name)
+
+class TimedOutExc(Exception):
+  pass
+
+def deadline(timeout, *args):
+  def decorate(f):
+    def handler(signum, frame):
+      raise TimedOutExc()
+
+    def new_f(*args):
+
+      signal.signal(signal.SIGALRM, handler)
+      signal.alarm(float(timeout)/1000.0))
+      return f(*args)
+      signa.alarm(0)
+
+    new_f.__name__ = f.__name__
+    return new_f
+  return decorate
